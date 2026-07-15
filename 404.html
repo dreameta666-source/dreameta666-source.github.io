@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>北海道 2026｜Baby & Oriental Vegetarian</title>
+<meta name="theme-color" content="#2f6f73">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./assets/icon.svg">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
+<style>
+:root{
+  --bg:#f6f2ea;--card:#fffdf8;--text:#25211c;--muted:#756d62;
+  --line:#e4d8c8;--main:#2f6f73;--warn:#b65b4b;--soft:#eef8f7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.55}
+.app{max-width:860px;margin:auto;padding:16px 14px 40px}
+.hero{background:linear-gradient(135deg,#2f6f73,#274f58);color:white;border-radius:26px;padding:24px 18px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.kicker{font-size:13px;letter-spacing:.18em;opacity:.8;font-weight:800}
+h1{font-size:42px;line-height:1;margin:8px 0 6px;letter-spacing:-.05em}
+.sub{opacity:.92;margin:0;font-size:15px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pill{font-size:13px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.14);padding:7px 10px;border-radius:999px}
+.tabs{position:sticky;top:0;z-index:10;background:rgba(246,242,234,.92);backdrop-filter:blur(12px);display:flex;gap:8px;overflow-x:auto;margin:14px -14px 0;padding:10px 14px;border-bottom:1px solid var(--line)}
+button,.btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 12px;font-size:14px;font-weight:800;color:var(--text);cursor:pointer;text-decoration:none;display:inline-block}
+button.active,.btn.primary{background:var(--main);color:white;border-color:var(--main)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:15px;margin-top:14px;box-shadow:0 8px 22px rgba(45,35,20,.08)}
+.date{font-size:13px;font-weight:900;color:var(--main);letter-spacing:.06em}
+h2{font-size:24px;line-height:1.15;margin:4px 0 8px}
+h3{margin:8px 0 6px}
+.tag{display:inline-block;font-size:12px;font-weight:800;background:#f0eee8;color:#62594d;padding:5px 8px;border-radius:999px;margin:3px 4px 3px 0}
+.tag.food{background:#ecf7ed;color:#3f7443}.tag.warn{background:#fff0eb;color:#9d4c39}.tag.move{background:#edf5fb;color:#3a6580}
+.alert{border-left:5px solid var(--warn);background:#fff5f0;padding:10px 12px;border-radius:14px;color:#6d372c;margin:12px 0;font-size:14px}
+.ok{border-left-color:#4b7f52;background:#f0f8ef;color:#315c38}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:36px}}
+.item{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.time{font-weight:900;color:var(--main);font-size:14px}
+.loc{font-weight:900;font-size:16px}
+.note{color:var(--muted);font-size:14px}
+.trans{margin-top:5px;color:#4b6170;font-size:13px;font-weight:800}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.mini{font-size:12px;padding:7px 9px}
+.map{background:var(--soft);color:#235c60;border-color:#cce6e4}
+.copy{white-space:pre-wrap;background:#26221d;color:#fff7e8;border-radius:14px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;overflow:auto}
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="kicker">HOKKAIDO 2026</div>
+    <h1>Baby & Oriental Vegetarian</h1>
+    <p class="sub">7/21–7/27｜SAPPORO STREAM HOTEL｜3歲小孩｜蛋奶素＋無洋蔥五辛</p>
+    <div class="pills">
+      <span class="pill">🏨 全程住薄野</span>
+      <span class="pill">🥚 早餐水煮蛋</span>
+      <span class="pill">🧅 無洋蔥 / 五葷抜き</span>
+      <span class="pill">🛒 推車必帶</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+  <main id="content"></main>
+  <div class="footer">地圖按鈕會開啟 Google Maps。建議出發前一天再用 Google Maps / 乘換案內確認車程與班次。</div>
+</div>
+
+<script>
+const hotel = "SAPPORO STREAM HOTEL";
+const searchMap = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const routeMap = (a,b,mode="transit") => `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(a)}&destination=${encodeURIComponent(b)}&travelmode=${mode}`;
+
+const jpDiet = `ラクト・オボ・ベジタリアンです。
+肉、魚、魚介類、かつお出汁、ゼラチンは食べられません。
+玉ねぎ、にんにく、ねぎ、にら、らっきょうも食べられません。
+卵と乳製品は大丈夫です。`;
+
+const jpAsk = `五葷抜きの料理はありますか？
+玉ねぎ、にんにく、ねぎ、にら、らっきょうは入っていますか？`;
+
+const days = [
+{
+ id:"d1", no:1, date:"7/21（二）", title:"抵達札幌",
+ tags:["抵達日","少移動","福の樹外送備案"],
+ summary:"新千歲 → SAPPORO STREAM HOTEL。晚上只補給或福の樹外送，不排正式餐廳。",
+ lunch:"飛機上 / 機場簡單補給",
+ dinner:"福の樹外送；備案 COCONO SUSUKINO / 超商",
+ caution:"不要排 JYOTI。印度咖哩底常有洋蔥、蒜，對你們不穩。",
+ items:[
+  ["15:00","新千歲機場","入境、拿行李、整理推車。","", "New Chitose Airport"],
+  ["16:00–17:20","前往 SAPPORO STREAM HOTEL","優先機場巴士到薄野；若想快一點就 JR 到札幌站＋計程車。","巴士約75分；JR＋計程車約50–60分", hotel, ["New Chitose Airport",hotel]],
+  ["17:30–18:00","Check-in","先處理房間、行李。8F 洗/乾 1.5kg以下：600日圓/105分鐘。","",hotel],
+  ["18:30","晚餐：福の樹外送 / COCONO補給","點ベジトマトヌードル。若外送不可，買水煮蛋、優格、起司、麵包、水果、牛奶、沙拉。","外送或飯店樓下","福の樹 札幌"]
+ ]
+},
+{
+ id:"d2", no:2, date:"7/22（三）", title:"慶生日：Veggy Way",
+ tags:["慶生","取消水族館","14:00主餐","五葷抜き"],
+ summary:"晚起，不跑 AOAO。14:00 Veggy Way 慶生主餐，回飯店買小蛋糕慶祝。",
+ lunch:"14:00 Veggy Way 當慶生主餐",
+ dinner:"飯店蛋糕＋簡單補給",
+ caution:"Veggy Way 要確認 14:00 可訂位、可推車、是否可準備外帶甜點。",
+ items:[
+  ["10:30–11:30","起床 / 早餐","自備水煮蛋。中午不要吃太飽。","",hotel],
+  ["12:30–13:10","飯店附近整理 / 輕食","補水、上廁所，小孩吃一點優格或水果即可。","", "COCONO SUSUKINO"],
+  ["13:20","飯店 → Veggy Way","計程車優先，不建議地鐵轉乘。","計程車約15–25分","Veggy Way Sapporo",[hotel,"Veggy Way Sapporo"]],
+  ["14:00–15:30","Veggy Way 慶生主餐","這餐是全程最安全的主餐。完全菜食、五葷抜き方向。","", "Veggy Way Sapporo"],
+  ["15:30–16:15","圓山公園附近短走 / 回飯店","看小孩狀態。累就直接計程車回飯店。","計程車約15–25分","Maruyama Park Sapporo",["Veggy Way Sapporo",hotel]],
+  ["17:00–17:30","買小蛋糕","COCONO SUSUKINO B1：Fruitscake Factory 或 Patisserie Frères。問是否有ゼラチン，避免巧克力。","", "COCONO SUSUKINO Patisserie Frères"],
+  ["18:00–19:00","飯店慶祝","晚餐隨便吃，不再排正式餐廳。","",hotel]
+ ]
+},
+{
+ id:"d3", no:3, date:"7/23（四）", title:"富良野・美瑛一日團",
+ tags:["早起","花田","推車帶"],
+ summary:"全程最硬的一天。推車放遊覽車行李艙，午餐不要依賴團餐。",
+ lunch:"自備，不吃團餐",
+ dinner:"福の樹外送 / 飯店周邊簡單吃",
+ caution:"這天不要排正式晚餐，因為一日團可能延誤。",
+ items:[
+  ["06:30","起床 / 早餐","水煮蛋＋前一晚準備麵包、優格、香蕉、水。","",hotel],
+  ["07:15","飯店 → 札幌東急 REI 飯店","集合點離飯店近。下雨或小孩不配合就計程車。","走路5–8分；計程車3–5分","Sapporo Tokyu REI Hotel",[hotel,"Sapporo Tokyu REI Hotel"]],
+  ["07:40","一日團出發","認 Easy Go 旗子。推車收折放行李艙。","", "Sapporo Tokyu REI Hotel"],
+  ["08:50","砂川休息站","休息約15分鐘。補水、廁所。","", "Sunagawa Highway Oasis"],
+  ["11:00","白金青池","下車參觀30分鐘。青池不大，30分鐘夠。","", "Shirogane Blue Pond"],
+  ["11:55","四季彩之丘","約60分鐘。不要貪走全區，推車慢慢看主要花田。","", "Shikisai no Oka"],
+  ["13:10","午餐時間","不要依賴團餐。自備水煮蛋、麵包、起司、優格、香蕉、小孩零食。","", "Furano"],
+  ["14:25","富田農場","約60分鐘。主攻薰衣草與花田，不必全走完。","", "Farm Tomita"],
+  ["18:10","回札幌東急 REI 飯店","走回飯店。若塞車，晚餐不要訂位。","", "Sapporo Tokyu REI Hotel",["Sapporo Tokyu REI Hotel",hotel]],
+  ["18:45","晚餐","福の樹外送，或 COCONO / 超商簡單吃。","", "福の樹 札幌"]
+ ]
+},
+{
+ id:"d4", no:4, date:"7/24（五）", title:"三井 Outlet 北廣島",
+ tags:["購物整天","避開週日","午餐自備"],
+ summary:"小樽對調後，週五排 Outlet。比週日人少，不塞其他景點。",
+ lunch:"自備為主，Outlet 只補飲料 / 甜點",
+ dinner:"飯店周邊簡單吃",
+ caution:"Outlet 內 vegetable / vegan 不代表無洋蔥。",
+ items:[
+  ["10:00","起床 / 早餐","自備水煮蛋。帶足水、零食、可當午餐的安全食物。","",hotel],
+  ["10:35","飯店 → 札幌站巴士點","用計程車，避免推車轉地鐵。","計程車約5–10分","Sapporo Station",[hotel,"Sapporo Station"]],
+  ["11:00–11:50","直達巴士到三井 Outlet","札幌站前搭直達巴士。實際班次以前一天查詢為準。","巴士約50分","Mitsui Outlet Park Sapporo Kitahiroshima",["Sapporo Station","Mitsui Outlet Park Sapporo Kitahiroshima"]],
+  ["12:00","抵達 Outlet","先確認回程巴士時間，避免傍晚混亂。","", "Mitsui Outlet Park Sapporo Kitahiroshima"],
+  ["12:15","午餐","不要賭蔬菜咖哩或湯咖哩；可能有洋蔥、蒜、肉湯、魚湯。以自備為主。","", "Mitsui Outlet Park Sapporo Kitahiroshima Food Court"],
+  ["13:00–17:30","Outlet 購物","小孩累了推車睡，大人輪流逛。","", "Mitsui Outlet Park Sapporo Kitahiroshima"],
+  ["17:30–18:30","回札幌","搭直達巴士或計程車＋大眾運輸。回飯店整理戰利品。","約60–70分",hotel,["Mitsui Outlet Park Sapporo Kitahiroshima",hotel]],
+  ["19:00","晚餐","飯店周邊簡單吃；體力夠再福の樹外送。","", "COCONO SUSUKINO"]
+ ]
+},
+{
+ id:"d5", no:5, date:"7/25（六）", title:"真駒內瀧野靈園＋瀧野鈴蘭",
+ tags:["親子放電","石像","交通要控"],
+ summary:"先看真駒內瀧野靈園石像，再去瀧野鈴蘭兒童谷。回程不要賭現場叫車。",
+ lunch:"公園野餐，自備安全食物",
+ dinner:"福の樹 / 超商補給",
+ caution:"回程計程車不好叫。14:45–15:00 就要開始叫車，或這天租車一天。",
+ items:[
+  ["10:00","起床 / 早餐","自備水煮蛋。午餐先準備好。","",hotel],
+  ["10:45","飯店 → 真駒內瀧野靈園","計程車主方案。若願意租車，這天是最值得租車的一天。","計程車約35–45分","Makomanai Takino Cemetery",[hotel,"Makomanai Takino Cemetery"]],
+  ["11:30–12:15","真駒內瀧野靈園","看摩艾像、頭大佛、石像區。這是墓園，保持安靜。","", "Makomanai Takino Cemetery Hill of the Buddha"],
+  ["12:15–12:25","靈園 → 瀧野鈴蘭丘陵公園","兩地很近。","計程車約7–10分","Takino Suzuran Hillside Park",["Makomanai Takino Cemetery","Takino Suzuran Hillside Park"]],
+  ["12:30–13:00","公園野餐","自備：水煮蛋、麵包、起司、優格、水果、香蕉、水、小孩餅乾。","", "Takino Suzuran Hillside Park"],
+  ["13:00–15:30","瀧野鈴蘭：こどもの谷","主攻兒童遊具、水遊戲、草坡。推車當基地車，帶換洗衣物、毛巾、防曬。","", "Takino Suzuran Hillside Park Kodomo no Tani"],
+  ["14:45–15:00","開始處理回程車","用 GO / Uber Taxi / DiDi 試叫，或請服務中心幫忙叫車。不要15:30才叫。","", "Takino Suzuran Hillside Park East Gate"],
+  ["15:30–16:15","回飯店","第一方案：提前叫計程車。備案：真106巴士到真駒內站，再地鐵回薄野。","計程車約35–45分；巴士＋地鐵約70–90分",hotel,["Takino Suzuran Hillside Park",hotel]],
+  ["18:30","晚餐","福の樹或飯店周邊簡單吃。若連續吃膩就超商補給。","", "福の樹 札幌"]
+ ]
+},
+{
+ id:"d6", no:6, date:"7/26（日）", title:"小樽＋潮祭煙火早撤",
+ tags:["小樽","祭典","20:15撤退"],
+ summary:"小樽從 7/24 對調到 7/26。煙火只看前15–20分鐘，避開20:30散場人潮。",
+ lunch:"WORLD BAO OTARUNAI，現場確認無洋蔥五辛",
+ dinner:"不排正式晚餐，用包子、麵包、優格、起司、水果補給",
+ caution:"煙火核心會場視野好但散場差。帶小孩要把撤退路線放第一。",
+ items:[
+  ["10:00–10:30","起床 / 早餐","自備水煮蛋。這天會拖到晚上，白天不要太早出門。","",hotel],
+  ["11:30","飯店 → 札幌站","計程車處理，省推車轉乘。","計程車約5–10分","Sapporo Station",[hotel,"Sapporo Station"]],
+  ["12:00–12:45","JR 札幌 → 小樽","小孩可能在車上小睡。","JR約30–45分","Otaru Station",["Sapporo Station","Otaru Station"]],
+  ["13:00","午餐：WORLD BAO OTARUNAI","可作為主案，但 vegan 不等於無洋蔥。現場問「五葷抜きのものはありますか？」。","", "WORLD BAO OTARUNAI"],
+  ["13:45–16:30","小樽散步","小樽運河、堺町通、音樂盒堂、LeTAO、六花亭。推車可帶，路面有些顛。","", "Otaru Canal"],
+  ["16:30–18:00","休息補水","不要讓小孩一路撐到20:00。找安靜處休息，簡單補給。","", "Otaru Station"],
+  ["18:00–19:30","往小樽站與運河之間找位置","不要進第3號ふ頭深處，不買有料席。目標是容易撤退，不是最佳視野。","", "Otaru Port No.3 Pier"],
+  ["20:00","潮祭煙火開始","看前15–20分鐘即可。","", "Otaru Ushiomatsuri Fireworks"],
+  ["20:15–20:18","開始撤退","不要等20:30結束，直接往小樽站方向走。","", "Otaru Station",["Otaru Port No.3 Pier","Otaru Station"]],
+  ["20:45–21:15","JR 小樽 → 札幌","避開最大散場潮，但仍可能擁擠。到札幌站後計程車回飯店。","JR約30–45分",hotel,["Otaru Station",hotel]]
+ ]
+},
+{
+ id:"d7", no:7, date:"7/27（一）", title:"新千歲機場回程",
+ tags:["回程","機場半日","不要壓線"],
+ summary:"15:00 飛機。12:00 抵達機場最穩，午餐不要賭餐廳。",
+ lunch:"機場超商 / 麵包 / 優格 / 起司 / 水果",
+ dinner:"回台後",
+ caution:"機場餐廳也可能有柴魚高湯、肉湯、洋蔥，別賭。",
+ items:[
+  ["09:30–10:00","起床 / 早餐","自備水煮蛋。整理行李、戰利品、推車。","",hotel],
+  ["10:30","退房","確認護照、錢包、藥、眼藥水、孩子物品。","",hotel],
+  ["10:45","飯店 → 札幌站","計程車。","約5–10分","Sapporo Station",[hotel,"Sapporo Station"]],
+  ["11:10–11:50","JR 札幌 → 新千歲機場","快速 Airport。","約37–45分","New Chitose Airport",["Sapporo Station","New Chitose Airport"]],
+  ["12:00","抵達新千歲機場","午餐、伴手禮、哆啦A夢 / Royce 視時間安排。","", "New Chitose Airport"],
+  ["12:00–13:00","午餐","用超商 / 麵包 / 優格 / 起司 / 水果解決。蛋壽司、玉子燒要小心柴魚高湯。","", "New Chitose Airport restaurants"],
+  ["14:00","安檢","不要拖到太晚。","", "New Chitose Airport"],
+  ["15:00","起飛","回程。","", "New Chitose Airport"]
+ ]
+}
+];
+
+const tabs = [
+ ["overview","總覽"],
+ ...days.map(d => [d.id,`D${d.no}`]),
+ ["maps","地圖"],
+ ["phrases","翻譯"],
+ ["memo","備忘"]
+];
+
+let active = "overview";
+
+function tagHtml(tags){
+ return tags.map(t=>`<span class="tag">${t}</span>`).join("");
+}
+function actions(map,route){
+ let h = "";
+ if(map) h += `<a class="btn mini map" target="_blank" href="${searchMap(map)}">地圖</a>`;
+ if(route) h += `<a class="btn mini" target="_blank" href="${routeMap(route[0],route[1])}">路線</a>`;
+ return h ? `<div class="actions">${h}</div>` : "";
+}
+function renderTabs(){
+ document.getElementById("tabs").innerHTML = tabs.map(t =>
+   `<button class="${active===t[0]?'active':''}" onclick="setActive('${t[0]}')">${t[1]}</button>`
+ ).join("");
+}
+function setActive(id){
+ active = id;
+ render();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderDay(d){
+ return `
+ <section class="card">
+   <div class="date">DAY ${d.no}｜${d.date}</div>
+   <h2>${d.title}</h2>
+   <div>${tagHtml(d.tags)}</div>
+   <div class="alert ok"><b>主軸：</b>${d.summary}</div>
+   <div class="grid">
+     <div class="card" style="box-shadow:none"><b>午餐</b><div class="note">${d.lunch}</div></div>
+     <div class="card" style="box-shadow:none"><b>晚餐</b><div class="note">${d.dinner}</div></div>
+   </div>
+   <div>
+     ${d.items.map(x=>`
+       <div class="item">
+         <div class="time">${x[0]}</div>
+         <div>
+           <div class="loc">${x[1]}</div>
+           <div class="note">${x[2]}</div>
+           ${x[3] ? `<div class="trans">交通：${x[3]}</div>` : ""}
+           ${actions(x[4],x[5])}
+         </div>
+       </div>
+     `).join("")}
+   </div>
+   <div class="alert"><b>注意：</b>${d.caution}</div>
+ </section>`;
+}
+function overview(){
+ return `
+ <section class="card">
+   <h2>行程總覽</h2>
+   <div class="grid">
+     ${days.map(d=>`
+       <div class="card" style="box-shadow:none;cursor:pointer" onclick="setActive('${d.id}')">
+         <div class="date">DAY ${d.no}｜${d.date}</div>
+         <h3>${d.title}</h3>
+         <div>${tagHtml(d.tags)}</div>
+         <div class="note">${d.summary}</div>
+       </div>
+     `).join("")}
+   </div>
+ </section>
+ <section class="card">
+   <h2>餐食底線</h2>
+   <span class="tag food">蛋奶素</span>
+   <span class="tag warn">無洋蔥</span>
+   <span class="tag warn">無五辛</span>
+   <span class="tag warn">無柴魚高湯</span>
+   <div class="alert">日本菜單寫 vegetarian / vegan，仍可能有洋蔥、蒜、柴魚高湯。安全關鍵字是 <b>五葷抜き / オリエンタルベジタリアン</b>。</div>
+   <h3>日文翻譯</h3>
+   <div class="copy">${jpDiet}</div>
+ </section>`;
+}
+function maps(){
+ const list = [
+  ["飯店",hotel],["COCONO","COCONO SUSUKINO"],["Veggy Way","Veggy Way Sapporo"],["福の樹","福の樹 札幌"],
+  ["札幌東急 REI","Sapporo Tokyu REI Hotel"],["富田農場","Farm Tomita"],["四季彩之丘","Shikisai no Oka"],["青池","Shirogane Blue Pond"],
+  ["三井 Outlet","Mitsui Outlet Park Sapporo Kitahiroshima"],["真駒內瀧野靈園","Makomanai Takino Cemetery"],["瀧野鈴蘭","Takino Suzuran Hillside Park"],
+  ["小樽站","Otaru Station"],["小樽運河","Otaru Canal"],["WORLD BAO","WORLD BAO OTARUNAI"],["煙火會場","Otaru Port No.3 Pier"],["新千歲機場","New Chitose Airport"]
+ ];
+ return `
+ <section class="card">
+   <h2>快速地圖</h2>
+   <div class="grid">
+     ${list.map(x=>`<a class="btn map" target="_blank" href="${searchMap(x[1])}">📍 ${x[0]}</a>`).join("")}
+   </div>
+ </section>
+ <section class="card">
+   <h2>常用路線</h2>
+   <div class="grid">
+     <a class="btn" target="_blank" href="${routeMap('New Chitose Airport',hotel)}">機場 → 飯店</a>
+     <a class="btn" target="_blank" href="${routeMap(hotel,'Veggy Way Sapporo')}">飯店 → Veggy Way</a>
+     <a class="btn" target="_blank" href="${routeMap(hotel,'Mitsui Outlet Park Sapporo Kitahiroshima')}">飯店 → Outlet</a>
+     <a class="btn" target="_blank" href="${routeMap(hotel,'Takino Suzuran Hillside Park')}">飯店 → 瀧野鈴蘭</a>
+     <a class="btn" target="_blank" href="${routeMap('Sapporo Station','Otaru Station')}">札幌站 → 小樽站</a>
+     <a class="btn" target="_blank" href="${routeMap(hotel,'New Chitose Airport')}">飯店 → 新千歲機場</a>
+   </div>
+ </section>`;
+}
+function phrases(){
+ return `
+ <section class="card">
+   <h2>翻譯卡</h2>
+   <h3>飲食限制</h3>
+   <div class="copy">${jpDiet}</div>
+   <h3>問餐點</h3>
+   <div class="copy">${jpAsk}</div>
+   <h3>買蛋糕</h3>
+   <div class="copy">ゼラチンは入っていますか？
+チョコレートではないケーキはありますか？
+3歳の子どもが食べます。</div>
+   <h3>計程車</h3>
+   <div class="copy">SAPPORO STREAM HOTEL までお願いします。
+円山公園駅の近くの Veggy Way までお願いします。
+滝野すずらん丘陵公園の東口までお願いします。</div>
+ </section>`;
+}
+function memo(){
+ return `
+ <section class="card">
+   <h2>備忘</h2>
+   <div class="grid">
+     <div class="card" style="box-shadow:none"><h3>每天必帶</h3><div class="note">推車、水、濕紙巾、換洗衣服、薄外套、帽子、防曬、小孩餅乾、可當正餐的安全食物。</div></div>
+     <div class="card" style="box-shadow:none"><h3>洗衣</h3><div class="note">SAPPORO STREAM HOTEL：8F 洗/乾 1.5kg以下 600日圓 / 105分鐘。飲水機不要期待，房內熱水壺＋買水較穩。</div></div>
+     <div class="card" style="box-shadow:none"><h3>瀧野回程</h3><div class="note">不要15:30才叫車。14:45–15:00先用 App 或請服務中心叫。備案是真106巴士到真駒內站再地鐵回薄野。</div></div>
+     <div class="card" style="box-shadow:none"><h3>小樽煙火</h3><div class="note">20:00開始，看15–20分鐘，20:15–20:18撤退。不要進港邊核心、不要買有料席。</div></div>
+   </div>
+ </section>`;
+}
+function render(){
+ renderTabs();
+ const c = document.getElementById("content");
+ if(active==="overview") c.innerHTML = overview();
+ else if(active==="maps") c.innerHTML = maps();
+ else if(active==="phrases") c.innerHTML = phrases();
+ else if(active==="memo") c.innerHTML = memo();
+ else c.innerHTML = renderDay(days.find(d=>d.id===active));
+}
+render();
+</script>
+</body>
+</html>
