@@ -1,0 +1,10 @@
+{
+  "name": "北海道 2026",
+  "short_name": "北海道2026",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2ea",
+  "theme_color": "#2f6f73",
+  "icons": [{"src":"./assets/icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]
+}
