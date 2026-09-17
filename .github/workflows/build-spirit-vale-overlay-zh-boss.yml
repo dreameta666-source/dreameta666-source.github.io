@@ -20,7 +20,9 @@ jobs:
 
       - name: Clone upstream Spirit Vale Overlay
         shell: pwsh
-        run: git clone --depth 1 https://github.com/kar-mi/spirit-vale-overlay.git source
+        run: |
+          git config --global core.autocrlf false
+          git clone --depth 1 https://github.com/kar-mi/spirit-vale-overlay.git source
 
       - name: Apply zh-TW + Boss Only patch
         shell: pwsh
