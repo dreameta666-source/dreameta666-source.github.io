@@ -1,0 +1,77 @@
+name: Build Spirit Vale Overlay zh-TW Boss Only
+
+on:
+  push:
+    branches:
+      - chatgpt/spirit-vale-overlay-zh-boss
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout patch workspace
+        uses: actions/checkout@v6
+
+      - name: Clone upstream Spirit Vale Overlay
+        shell: pwsh
+        run: git clone --depth 1 https://github.com/kar-mi/spirit-vale-overlay.git source
+
+      - name: Apply zh-TW + Boss Only patch
+        shell: pwsh
+        run: node tools/patch-spirit-vale.mjs source
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install dependencies
+        working-directory: source
+        run: bun install --frozen-lockfile --verbose
+
+      - name: Typecheck
+        working-directory: source
+        run: bun run typecheck
+
+      - name: Test
+        working-directory: source
+        run: bun test
+
+      - name: Cache Neutralino binaries
+        uses: actions/cache@v4
+        with:
+          path: source/apps/desktop/bin
+          key: neutralino-zhboss-${{ hashFiles('source/apps/desktop/neutralino.config.json') }}
+
+      - name: Download Neutralino binaries
+        working-directory: source
+        run: bun run --filter @svoverlay/desktop update
+
+      - name: Build portable ZIP
+        working-directory: source
+        run: bun run package:portable
+
+      - name: Verify portable ZIP
+        working-directory: source
+        run: bun run verify:portable
+
+      - name: Stage artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $zip = Get-ChildItem -Path source/apps/desktop/dist -Filter "spirit-vale-overlay-windows-x64-v*.zip" | Select-Object -First 1
+          if (-not $zip) { throw "Portable ZIP not found" }
+          Copy-Item $zip.FullName "dist/Spirit-Vale-Overlay-zh-TW-BossOnly.zip"
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Spirit-Vale-Overlay-zh-TW-BossOnly
+          path: dist/Spirit-Vale-Overlay-zh-TW-BossOnly.zip
+          retention-days: 7
