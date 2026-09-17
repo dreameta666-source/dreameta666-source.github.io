@@ -26,7 +26,7 @@ jobs:
 
       - name: Apply zh-TW + Boss Only patch
         shell: pwsh
-        run: node tools/patch-spirit-vale.mjs source
+        run: node tools/patch-spirit-vale-v2.mjs source
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
